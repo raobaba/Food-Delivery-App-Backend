@@ -31,4 +31,27 @@ UserRouter.post("/api/login", async(req,res)=>{
          res.status(500).json("Error while Login",error.message);  
      }
 })
+
+UserRouter.put('/api/user/:id/reset', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { password, newPassword } = req.body;
+      // Find the user by ID
+      const user = await UserModel.findById(id);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      // Check if the current password matches
+      if (user.password !== password) {
+        return res.status(401).json({ error: 'Invalid current password' });
+      }
+      // Update the user's password
+      user.password = newPassword;
+      // Save the updated user to the database
+      const updatedUser = await user.save();
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to reset password' });
+    }
+  });
 module.exports = {UserRouter};
